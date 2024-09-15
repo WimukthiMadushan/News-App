@@ -41,7 +41,6 @@ const BreakingNews = (props: Props) => {
                 />
               )}
               <Text style={styles.newsTitle}>{item.title}</Text>
-              <Text style={styles.newsDescription}>{item.description}</Text>
             </View>
           </TouchableOpacity>
         )}

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Header from "@/components/Header";
@@ -6,35 +6,85 @@ import SearchBar from "@/components/SearchBar";
 import axios from "axios";
 import { NewsDataType } from "./../../types/index";
 import BreakingNews from "@/components/BreakingNews";
+import Categories from "@/components/Categories";
+import NewsList from "@/components/NewsList";
 
 type Props = {};
 
 const Page = (props: Props) => {
   const { top: safeTop } = useSafeAreaInsets();
   const [breakingNews, setBreakingNews] = useState<NewsDataType[]>([]);
+  const [News, setNews] = useState<NewsDataType[]>([]);
+  const [isBreakingNewsLoading, setIsBreakingNewsLoading] = useState(true);
+  const [isNewsListLoading, setIsNewsListLoading] = useState(true);
 
   useEffect(() => {
     getBreakingNews();
+    getNews();
   }, []);
 
   const getBreakingNews = async () => {
     try {
-      const URL = `https://newsdata.io/api/1/news?apikey=pub_5345115aa8f90d8487470e274a960dbb9e8cb&country=lk&language=en&category=health,lifestyle,politics,sports,technology &image=1&removeduplicate=1&size=5`;
+      const URL = `https://newsdata.io/api/1/news?apikey=pub_5345115aa8f90d8487470e274a960dbb9e8cb&language=en&category=health,lifestyle,politics,sports,technology&image=1&removeduplicate=1&size=5`;
       const response = await axios.get(URL);
       if (response && response.data) {
         setBreakingNews(response.data.results);
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsBreakingNewsLoading(false);
     }
   };
 
+  const getNews = async (category: string = "") => {
+    setIsNewsListLoading(true);
+    try {
+      let categoryList = "";
+      if (category.length !== 0) {
+        categoryList = `&category=${category}`;
+      }
+      const URL = `https://newsdata.io/api/1/news?apikey=pub_5345115aa8f90d8487470e274a960dbb9e8cb&language=en&image=1&removeduplicate=1&size=10${categoryList}`;
+      const response = await axios.get(URL);
+      if (response && response.data) {
+        setNews(response.data.results);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsNewsListLoading(false);
+    }
+  };
+
+  const onCatChange = (category: string) => {
+    setNews([]);
+    getNews(category);
+  };
+
   return (
-    <View style={[styles.container, { paddingTop: safeTop }]}>
+    <ScrollView style={[styles.container, { paddingTop: safeTop }]}>
       <Header />
       <SearchBar />
-      <BreakingNews newsList={breakingNews} />
-    </View>
+
+      {/* Breaking News Section */}
+      {isBreakingNewsLoading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <BreakingNews newsList={breakingNews} />
+      )}
+
+      {/* Categories Section */}
+      <Categories onCategoryChange={onCatChange} />
+
+      {/* News List Section */}
+      {isNewsListLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      ) : (
+        <NewsList newsList={News} />
+      )}
+    </ScrollView>
   );
 };
 
@@ -45,44 +95,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f9f9f9",
   },
-  breakingNewsContainer: {
-    paddingVertical: 10,
-  },
-  breakingNewsTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
-    marginHorizontal: 10,
-    marginBottom: 10,
-  },
-  newsList: {
-    paddingLeft: 10,
-  },
-  newsItem: {
-    position: "relative", // Make the text container absolute
-    marginRight: 10, // Margin to space out items in horizontal scroll
-  },
-  newsImage: {
-    width: 300, // Set to a specific width or use `flex: 1` if you want it to fill the container
-    height: 150,
-    borderRadius: 10,
-  },
-  textContainer: {
-    position: "absolute", // Position text on top of the image
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+  loadingContainer: {
     justifyContent: "center",
     alignItems: "center",
-    padding: 10,
-    backgroundColor: "rgba(0, 0, 0, 0.4)", // Semi-transparent background for better text visibility
-    borderRadius: 10,
-  },
-  newsTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#fff",
-    textAlign: "center",
+    paddingVertical: 20,
   },
 });
