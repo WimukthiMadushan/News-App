@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import React from "react";
 import { NewsDataType } from "@/types";
+import { Link } from "expo-router";
 
 type Props = {
   newsList: Array<NewsDataType>;
@@ -19,30 +20,32 @@ const BreakingNews = (props: Props) => {
       <Text style={styles.title}>Breaking News</Text>
       <FlatList
         data={props.newsList}
-        keyExtractor={(item) => item._id}
+        keyExtractor={(item) => item.article_id}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.carousel}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.newsItem}>
-            {item.image_url && (
-              <Image
-                source={{ uri: item.image_url }}
-                style={styles.newsImage}
-                resizeMode="cover"
-              />
-            )}
-            <View style={styles.textContainer}>
-              {item.source_icon && (
+          <Link href={`/News/${item.article_id}`} asChild>
+            <TouchableOpacity style={styles.newsItem}>
+              {item.image_url && (
                 <Image
-                  source={{ uri: item.source_icon }}
-                  style={styles.sourceIcon}
-                  resizeMode="contain"
+                  source={{ uri: item.image_url }}
+                  style={styles.newsImage}
+                  resizeMode="cover"
                 />
               )}
-              <Text style={styles.newsTitle}>{item.title}</Text>
-            </View>
-          </TouchableOpacity>
+              <View style={styles.textContainer}>
+                {item.source_icon && (
+                  <Image
+                    source={{ uri: item.source_icon }}
+                    style={styles.sourceIcon}
+                    resizeMode="contain"
+                  />
+                )}
+                <Text style={styles.newsTitle}>{item.title}</Text>
+              </View>
+            </TouchableOpacity>
+          </Link>
         )}
       />
     </View>

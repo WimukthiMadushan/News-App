@@ -1,5 +1,6 @@
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
+import { Link } from "expo-router"; // Ensure you're using the right `Link` component from expo-router
 import { NewsDataType } from "@/types";
 
 type Props = {
@@ -10,30 +11,41 @@ const NewsList = ({ newsList }: Props) => {
   return (
     <View style={styles.listContainer}>
       {newsList.map((news, index) => (
-        <View key={index} style={styles.newsItem}>
-          {/* Display image if available */}
-          {news.image_url && (
-            <Image source={{ uri: news.image_url }} style={styles.newsImage} />
-          )}
-          <View style={styles.textContainer}>
-            {/* News category */}
-            <Text style={styles.category}>{news.category}</Text>
-
-            {/* News title */}
-            <Text style={styles.newsTitle}>{news.title}</Text>
-
-            {/* Source section with icon and name */}
-            <View style={styles.sourceContainer}>
-              {news.source_icon && (
+        <Link key={index} href={`/News/${news.article_id}`} asChild>
+          <TouchableOpacity
+            style={styles.newsItem}
+            accessible={true}
+            accessibilityLabel={`Read more about ${news.title}`}
+          >
+            <View>
+              {/* Display image if available */}
+              {news.image_url && (
                 <Image
-                  source={{ uri: news.source_icon }}
-                  style={styles.sourceIcon}
+                  source={{ uri: news.image_url }}
+                  style={styles.newsImage}
                 />
               )}
-              <Text style={styles.sourceName}>{news.source_name}</Text>
+              <View style={styles.textContainer}>
+                {/* News category */}
+                <Text style={styles.category}>{news.category}</Text>
+
+                {/* News title */}
+                <Text style={styles.newsTitle}>{news.title}</Text>
+
+                {/* Source section with icon and name */}
+                <View style={styles.sourceContainer}>
+                  {news.source_icon && (
+                    <Image
+                      source={{ uri: news.source_icon }}
+                      style={styles.sourceIcon}
+                    />
+                  )}
+                  <Text style={styles.sourceName}>{news.source_name}</Text>
+                </View>
+              </View>
             </View>
-          </View>
-        </View>
+          </TouchableOpacity>
+        </Link>
       ))}
     </View>
   );
@@ -86,6 +98,7 @@ const styles = StyleSheet.create({
   sourceIcon: {
     width: 20,
     height: 20,
+    borderRadius: 10, // Rounds the source icon
     marginRight: 8,
   },
   sourceName: {
